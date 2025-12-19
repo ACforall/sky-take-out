@@ -8,10 +8,13 @@ import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
 import com.sky.entity.DishFlavor;
+import com.sky.entity.Setmeal;
+import com.sky.enumeration.OperationType;
 import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
+import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
@@ -33,6 +36,8 @@ public class DishServiceImpl implements DishService {
     private DishFlavorMapper dishFlavorMapper;
     @Autowired
     private SetmealDishMapper setmealDishMapper;
+    @Autowired
+    private SetmealMapper setmealMapper;
 
     @Override
     @Transactional
@@ -128,6 +133,30 @@ public class DishServiceImpl implements DishService {
                 dishFlavor.setDishId(dishDTO.getId());
             });
             dishFlavorMapper.insertBatch(flavors);
+        }
+    }
+
+    /**
+     * 菜品启用停用
+     * @param id
+     * @param status
+     */
+    @Override
+    @Transactional
+    public void startOrStop(Long id, Integer status) {
+        Dish dish=Dish.builder().id(id).status(status).build();
+        dishMapper.update(dish);
+        //如果是停售，需要把关联的套餐也停售。逻辑是：套餐里面可以有未启售的菜品，但是如果有停售的菜品那么套餐也不能启售
+        if(status==StatusConstant.DISABLE){
+            List<Long> dishIds=new ArrayList<>();
+            dishIds.add(id);
+            List<Long> setmealIdsByDishIds = setmealDishMapper.getSetmealIdsByDishIds(dishIds);
+            if(setmealIdsByDishIds!=null&&!setmealIdsByDishIds.isEmpty()){
+                setmealIdsByDishIds.forEach(setmealId->{
+                    Setmeal setmeal=Setmeal.builder().id(setmealId).status(StatusConstant.DISABLE).build();
+                    setmealMapper.update(setmeal);
+                });
+            }
         }
     }
 }
