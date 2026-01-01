@@ -80,4 +80,38 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         ShoppingCart shoppingCart=ShoppingCart.builder().userId(userId).build();
         return shoppingCartMapper.list(shoppingCart);
     }
+
+    /**
+     * 清空购物车
+     */
+    @Override
+    public void cleanShoppingCart() {
+        Long userId=BaseContext.getCurrentId();
+        shoppingCartMapper.cleanAll(userId);
+    }
+
+    /**
+     * 删除购物车中的一个商品
+     * @param shoppingCartDTO
+     */
+    @Override
+    public void subOne(ShoppingCartDTO shoppingCartDTO) {
+        //先判断删除的是菜品还是套餐?不用了，直接用list动态去查
+        ShoppingCart shoppingCart=new ShoppingCart();
+        BeanUtils.copyProperties(shoppingCartDTO,shoppingCart);
+        List<ShoppingCart> list=shoppingCartMapper.list(shoppingCart);
+        if(list!=null&&!list.isEmpty()){
+            ShoppingCart toBeSub=list.get(0);//理论上只有一个
+            Integer number=toBeSub.getNumber();
+            if(number==1){
+                //相当于直接删除这条数据
+                shoppingCartMapper.deleteById(toBeSub.getId());
+            }
+            else{
+                //number-1
+                toBeSub.setNumber(toBeSub.getNumber()-1);
+                shoppingCartMapper.updateNumberById(toBeSub);
+            }
+        }
+    }
 }
