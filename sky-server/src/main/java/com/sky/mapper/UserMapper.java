@@ -1,6 +1,7 @@
 package com.sky.mapper;
 
 import com.sky.entity.User;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -10,4 +11,7 @@ public interface UserMapper {
     User getByOpenId(String openId);
 
     void insert(User user);
+
+    @Select("select * from user where id=#{id}")
+    User getById(Long userId);
 }
