@@ -41,4 +41,31 @@
         </set>
         where id = #{id}
     </update>
+    <select id="pageQuery" resultType="com.sky.vo.OrderVO">
+        select * from orders
+        <where>
+            <if test="number!=null">
+                and `number` like concat('%',#{phone},'%')
+            </if>
+            <if test="phone!=null">
+                and phone=#{phone}
+            </if>
+            <if test="status!=null">
+                and status=#{status}
+            </if>
+            <if test="beginTime!=null">
+                and order_time &gt;= #{beginTime}
+            </if>
+            <if test="endTime!=null">
+                and order_time &lt;= #{endTime}
+            </if>
+            <if test="userId!=null">
+                and user_id=#{userId}
+            </if>
+        </where>
+        order by order_time desc
+    </select>
+    <select id="countGroupByStatus" resultType="com.sky.vo.OrderStatusCountVO">
+        select status,count(*) as cnt from orders group by status;
+    </select>
 </mapper>

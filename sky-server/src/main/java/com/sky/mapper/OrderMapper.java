@@ -1,8 +1,15 @@
 package com.sky.mapper;
 
+import com.github.pagehelper.Page;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.entity.Orders;
+import com.sky.vo.OrderStatisticsVO;
+import com.sky.vo.OrderStatusCountVO;
+import com.sky.vo.OrderVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 @Mapper
 public interface OrderMapper {
@@ -25,4 +32,23 @@ public interface OrderMapper {
      */
     void update(Orders orders);
 
+    /**
+     * 分页查询历史订单
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    Page<OrderVO> pageQuery(OrdersPageQueryDTO ordersPageQueryDTO);
+
+    /**
+     * 查询order详细内容
+     * @param orderId
+     */
+    @Select("select * from orders where id=#{orderId}")
+    Orders getByOrderId(Long orderId);
+
+    /**
+     * 获得各个状态的订单统计数据
+     * @return
+     */
+    List<OrderStatusCountVO> countGroupByStatus();
 }

@@ -56,3 +56,8 @@ sky:
     access-key-id: ${sky.alioss.access-key-id}
     access-key-secret: ${sky.alioss.access-key-secret}
     bucket-name: ${sky.alioss.bucket-name}
+  baidu:
+    api-key: ${sky.baidu.api-key}
+  shop:
+    address: 江苏省张家港市杨舍镇泗杨路美辰壹号西南2门
+    distance: 5
