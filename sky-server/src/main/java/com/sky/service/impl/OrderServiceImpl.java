@@ -20,6 +20,7 @@ import com.sky.service.OrderService;
 import com.sky.utils.HttpClientUtil;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.*;
+import com.sky.websocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,8 @@ public class OrderServiceImpl implements OrderService {
     private BaiduMapProperties baiduMapProperties;
     @Autowired
     private ShopProperties shopProperties;
+    @Autowired
+    private WebSocketServer webSocketServer;
 
     //地理编码接口
     private static final String geocodeURL = "https://api.map.baidu.com/geocoding/v3/";
@@ -233,6 +236,14 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+
+        //通过websocket向客户端浏览器推送消息type orderid content
+        Map map=new HashMap();//可以不指定放的类型诶
+        map.put("type",1);//1表示来单提醒2表示客户催单
+        map.put("orderId",ordersDB.getId());
+        map.put("content","订单号："+outTradeNo);
+        String json= JSONArray.toJSONString(map);
+        webSocketServer.sendToAllClient(json);
     }
 
     /**
